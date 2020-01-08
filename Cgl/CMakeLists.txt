@@ -38,6 +38,32 @@ add_definitions(-DCGL_BUILD)
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/include/config_cgl.h.in ${CMAKE_BINARY_DIR}/Cgl/include/config_cgl.h)
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/include/config.h.in     ${CMAKE_BINARY_DIR}/Cgl/include/config.h)
 
+#
+# pkg-config file generation
+#
+
+set(prefix           "${CMAKE_INSTALL_PREFIX}")
+set(exec_prefix      "\${prefix}")
+set(libdir           "${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_LIBDIR}")
+set(includedir       "${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_INCLUDEDIR}")
+set(CGLLIB_PCLIBS     "")
+set(CGLLIB_PCREQUIRES "osi-clp cgl osi coinutils")
+set(PACKAGE_VERSION   "${CGL_VERSION}")
+
+configure_file(${Cgl_DIR}/cgl.pc.in ${CMAKE_BINARY_DIR}/Cgl/cgl.pc @ONLY)
+
+set(libdir         "${Cgl_DIR}")
+set(abs_source_dir "${CMAKE_BINARY_DIR}/bin")
+
+configure_file(${Cgl_DIR}/cgl-uninstalled.pc.in ${CMAKE_BINARY_DIR}/Cgl/cgl-uninstalled.pc @ONLY)
+
+install(FILES ${CMAKE_BINARY_DIR}/Cgl/cgl.pc
+        DESTINATION ${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_LIBDIR}/pkg-config/)
+
+#
+# Build
+#
+
 set(Cgl_SRC_LIST ${Cgl_DIR}/src/CglMixedIntegerRounding/CglMixedIntegerRoundingTest.cpp
                  ${Cgl_DIR}/src/CglMixedIntegerRounding/CglMixedIntegerRounding.cpp
                  ${Cgl_DIR}/src/CglDuplicateRow/CglDuplicateRow.cpp
@@ -297,14 +323,16 @@ if (COINUTILS_USE_THREADS OR COIN_USE_PTHREAD_WIN32 OR CBC_USE_THREADS)
 endif ()
 
 install(TARGETS libCgl 
-        DESTINATION lib)
+        RUNTIME DESTINATION ${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_BINDIR}
+        LIBRARY DESTINATION ${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_LIBDIR}
+        ARCHIVE DESTINATION ${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_LIBDIR}/static)
 
 install(FILES ${Cgl_SRC_LIST_Headers} 
-        DESTINATION include/coin)
+        DESTINATION ${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_INCLUDEDIR}/coin)
 
 install(FILES ${CMAKE_BINARY_DIR}/Cgl/include/config_cgl.h
-        DESTINATION include/coin
+        DESTINATION ${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_INCLUDEDIR}/coin
         RENAME CglConfig.h)
 
 install(FILES ${CMAKE_BINARY_DIR}/Cgl/include/config_cgl.h
-        DESTINATION include/coin)
+        DESTINATION ${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_INCLUDEDIR}/coin)
